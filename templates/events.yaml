@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  EventBusName:
+    Type: String
+  PipelineStateChangeDeliveryStreamArn:
+    Type: String
+  StageStateChangeDeliveryStreamArn:
+    Type: String
+  ActionStateChangeDeliveryStreamArn:
+    Type: String
+
+Resources:
+
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Ref EventBusName
+
+  PipelineStateChangeEventRule: 
+      Type: AWS::Events::Rule
+      Properties: 
+        EventBusName: !Ref EventBus
+        EventPattern: 
+          source:
+            - 'aws.codepipeline'
+          detail-type:
+            - 'CodePipeline Pipeline Execution State Change'
+        State: "ENABLED"
+        Targets:
+          - Arn: !Ref PipelineStateChangeDeliveryStreamArn
+            Id: pipeline-state-change
+            RoleArn: !GetAtt EventsRole.Arn
+
+
+  StageStateChangeEventRule: 
+      Type: AWS::Events::Rule
+      Properties: 
+        EventBusName: !Ref EventBus
+        EventPattern: 
+          source:
+            - 'aws.codepipeline'
+          detail-type:
+            - 'CodePipeline Stage Execution State Change'
+        State: "ENABLED"
+        Targets:
+          - Arn: !Ref StageStateChangeDeliveryStreamArn
+            Id: stage-state-change
+            RoleArn: !GetAtt EventsRole.Arn
+
+
+  ActionStateChangeEventRule: 
+      Type: AWS::Events::Rule
+      Properties: 
+        EventBusName: !Ref EventBus
+        EventPattern: 
+          source:
+            - 'aws.codepipeline'
+          detail-type:
+            - 'CodePipeline Action Execution State Change'
+        State: "ENABLED"
+        Targets:
+          - Arn: !Ref ActionStateChangeDeliveryStreamArn
+            Id: action-state-change
+            RoleArn: !GetAtt EventsRole.Arn
+
+  EventsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+              - Sid: ''
+                Effect: Allow
+                Principal:
+                  Service: events.amazonaws.com
+                Action: 'sts:AssumeRole'
+      Path: "/"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'firehose:PutRecord'
+                  - 'firehose:PutRecordBatch'
+                Resource: 
+                  - !Ref PipelineStateChangeDeliveryStreamArn
+                  - !Ref StageStateChangeDeliveryStreamArn
+                  - !Ref ActionStateChangeDeliveryStreamArn

@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  LogBucket:
+    Type: String
+
+Outputs:
+  PipelineStateChangeDeliveryStreamArn:
+    Value: !GetAtt PipelineStateChangeDeliveryStream.Arn
+  StageStateChangeDeliveryStreamArn:
+    Value: !GetAtt StageStateChangeDeliveryStream.Arn
+  ActionStateChangeDeliveryStreamArn:
+    Value: !GetAtt ActionStateChangeDeliveryStream.Arn
+  DeliveryStreamLogGroup:
+    Value: !Ref DeliveryStreamLogGroup
+  DeliveryStreamLogStream:
+    Value: !Ref DeliveryStreamLogStream
+
+Resources:
+
+  FirehoseTransformFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python3.8
+      CodeUri: lambdas/firehose-transform
+      Timeout: 60
+
+  PipelineStateChangeDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        RoleARN: !GetAtt DeliveryStreamRole.Arn
+        BucketARN: !Sub 'arn:aws:s3:::${LogBucket}'
+        Prefix: 'pipeline_execution_state_change/'
+        ErrorOutputPrefix: 'error/pipeline_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+        BufferingHints:
+            SizeInMBs: 1
+            IntervalInSeconds: 60
+        CompressionFormat: GZIP
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref DeliveryStreamLogGroup
+          LogStreamName: !Ref DeliveryStreamLogStream
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            -
+                Type: Lambda
+                Parameters:
+                  - 
+                    ParameterName: LambdaArn
+                    ParameterValue: !GetAtt FirehoseTransformFunction.Arn
+
+
+  StageStateChangeDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        RoleARN: !GetAtt DeliveryStreamRole.Arn
+        BucketARN: !Sub 'arn:aws:s3:::${LogBucket}'
+        Prefix: 'stage_execution_state_change/'
+        ErrorOutputPrefix: 'error/stage_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+        BufferingHints:
+            SizeInMBs: 1
+            IntervalInSeconds: 60
+        CompressionFormat: GZIP
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref DeliveryStreamLogGroup
+          LogStreamName: !Ref DeliveryStreamLogStream
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            -
+                Type: Lambda
+                Parameters:
+                  - 
+                    ParameterName: LambdaArn
+                    ParameterValue: !GetAtt FirehoseTransformFunction.Arn
+
+
+  ActionStateChangeDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        RoleARN: !GetAtt DeliveryStreamRole.Arn
+        BucketARN: !Sub 'arn:aws:s3:::${LogBucket}'
+        Prefix: 'action_execution_state_change/'
+        ErrorOutputPrefix: 'error/action_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+        BufferingHints:
+            SizeInMBs: 1
+            IntervalInSeconds: 60
+        CompressionFormat: GZIP
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref DeliveryStreamLogGroup
+          LogStreamName: !Ref DeliveryStreamLogStream
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            -
+                Type: Lambda
+                Parameters:
+                  - 
+                    ParameterName: LambdaArn
+                    ParameterValue: !GetAtt FirehoseTransformFunction.Arn
+                      
+
+  DeliveryStreamLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+
+  DeliveryStreamLogStream:
+    Type: 'AWS::Logs::LogStream'
+    Properties:
+      LogGroupName: !Ref DeliveryStreamLogGroup
+
+  DeliveryStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+        AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+                - Sid: ''
+                  Effect: Allow
+                  Principal:
+                    Service: firehose.amazonaws.com
+                  Action: 'sts:AssumeRole'
+                  Condition:
+                    StringEquals:
+                        'sts:ExternalId': !Ref 'AWS::AccountId'
+        Path: "/"
+        Policies:
+            - PolicyName: firehose_delivery_policy
+              PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Action:
+                        - 's3:AbortMultipartUpload'
+                        - 's3:GetBucketLocation'
+                        - 's3:GetObject'
+                        - 's3:ListBucket'
+                        - 's3:ListBucketMultipartUploads'
+                        - 's3:PutObject'
+                      Resource:
+                            - !Join 
+                                - ''
+                                - - 'arn:aws:s3:::'
+                                  - !Ref LogBucket
+                            - !Join 
+                                - ''
+                                - - 'arn:aws:s3:::'
+                                  - !Ref LogBucket
+                                  - '/*'
+                    - Effect: Allow
+                      Action:
+                        - 'logs:PutLogEvents'
+                      Resource:
+                        - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${DeliveryStreamLogGroup}:log-stream:${DeliveryStreamLogStream}"
+                    - Effect: Allow
+                      Action:
+                            - 'lambda:InvokeFunction'
+                      Resource:
+                            - !GetAtt FirehoseTransformFunction.Arn

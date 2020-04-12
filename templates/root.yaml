@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  GlueDatabaseName:
+    Type: String
+    Description: 'The name of the Glue database'
+    Default: 'codepipeline-event-logs'
+  EventBusName:
+    Type: String
+    Description: 'The name of the event bus'
+    Default: 'codepipeline-events'
+
+Resources:
+
+  LogStack:
+    Type: AWS::CloudFormation::Template
+    Properties:
+      TemplateURL: logs.yaml
+      Parameters:
+        DatabaseName: !Ref GlueDatabaseName
+
+  DeliveryStack:
+    Type: AWS::CloudFormation::Template
+    Properties:
+      TemplateURL: delivery.yaml
+      Parameters:
+        LogBucket: !GetAtt LogStack.Outputs.LogBucket
+
+  EventStack:
+    Type: AWS::CloudFormation::Template
+    Properties:
+      TemplateURL: events.yaml
+      Parameters:
+        EventBusName: !Ref EventBusName
+        PipelineStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.PipelineStateChangeDeliveryStreamArn
+        StageStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.StageStateChangeDeliveryStreamArn
+        ActionStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.ActionStateChangeDeliveryStreamArn
