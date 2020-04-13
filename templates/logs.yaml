@@ -67,6 +67,7 @@ Resources:
   PipelineStateChangeTable:
     Type: AWS::Glue::Table
     Properties: 
+      CatalogId: !Ref AWS::AccountId
       DatabaseName: !Ref GlueDatabase
       TableInput: 
         Name: pipeline_execution_state_change
@@ -112,6 +113,7 @@ Resources:
   StageStateChangeTable:
     Type: AWS::Glue::Table
     Properties: 
+      CatalogId: !Ref AWS::AccountId
       DatabaseName: !Ref GlueDatabase
       TableInput: 
         Name: stage_execution_state_change
@@ -160,6 +162,7 @@ Resources:
   ActionStateChangeTable:
     Type: AWS::Glue::Table
     Properties: 
+      CatalogId: !Ref AWS::AccountId
       DatabaseName: !Ref GlueDatabase
       TableInput: 
         Name: action_execution_state_change
