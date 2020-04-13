@@ -7,10 +7,6 @@ Parameters:
     Type: String
     Description: 'The name of the Glue database'
     Default: 'codepipeline-event-logs'
-  EventBusName:
-    Type: String
-    Description: 'The name of the event bus'
-    Default: 'codepipeline-events'
   BufferingHintsSizeInMBs:
     Type: Number
     Default: 1
@@ -24,9 +20,6 @@ Outputs:
   GlueDatabaseName:
     Value: !Ref GlueDatabaseName
     Description: 'The name of the Glue database'
-  EventBusName:
-    Value: !Ref EventBusName
-    Description: 'The name of the event bus'
   LogBucket:
     Value: !GetAtt LogStack.Outputs.LogBucket
     Description: 'The name of the S3 bucket holding the log files'
@@ -69,7 +62,6 @@ Resources:
     Properties:
       TemplateURL: events.yaml
       Parameters:
-        EventBusName: !Ref EventBusName
         PipelineStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.PipelineStateChangeDeliveryStreamArn
         StageStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.StageStateChangeDeliveryStreamArn
         ActionStateChangeDeliveryStreamArn: !GetAtt DeliveryStack.Outputs.ActionStateChangeDeliveryStreamArn
