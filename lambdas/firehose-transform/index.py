@@ -19,7 +19,7 @@ def handler(event, context):
             encoded_data = base64.b64encode(decoded_data.encode("utf-8")).decode("utf-8")
             output.append({
                 "recordId": record["recordId"],
-                "result": "OK",
+                "result": "Ok",
                 "data": encoded_data,
             })
         except:
