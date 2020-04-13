@@ -219,7 +219,7 @@ Resources:
       Properties:
           Handler: index.handler
           Runtime: python3.8
-          CodeUri: lambdas/create-partition
+          CodeUri: ../lambdas/create-partition
           Timeout : 20
           Environment:
             Variables:
