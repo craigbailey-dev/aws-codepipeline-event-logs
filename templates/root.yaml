@@ -6,7 +6,7 @@ Parameters:
   GlueDatabaseName:
     Type: String
     Description: 'The name of the Glue database'
-    Default: 'codepipeline-event-logs'
+    Default: 'codepipeline_event_logs'
   BufferingHintsSizeInMBs:
     Type: Number
     Default: 1

@@ -98,7 +98,7 @@ def handler(event, context):
         source_key = record["s3"]["object"]["key"]
         table, year, month, day, hour, _ = source_key.split("/")
         date = "{}-{}-{}".format(year, month, day)
-        s3_location = 's3://{}/{}/{}/{}/{}'.format(source_key, table, year, month, day, hour)
+        s3_location = 's3://{}/{}/{}/{}/{}'.format(source_bucket, table, year, month, day, hour)
         partition = form_partition(table, date, hour, s3_location)
         try:
             glue_client.create_partition(DatabaseName=os.environ["DATABASE_NAME"], TableName=table, PartitionInput=partition)
