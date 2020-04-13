@@ -3,6 +3,8 @@ Transform:
 - AWS::Serverless-2016-10-31
 
 Parameters:
+  EventBusName:
+    Type: String
   PipelineStateChangeDeliveryStreamArn:
     Type: String
   StageStateChangeDeliveryStreamArn:
@@ -12,9 +14,15 @@ Parameters:
 
 Resources:
 
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Ref EventBusName
+
   PipelineStateChangeEventRule: 
       Type: AWS::Events::Rule
       Properties: 
+        EventBusName: !Ref EventBus
         EventPattern: 
           source:
             - 'aws.codepipeline'
@@ -30,6 +38,7 @@ Resources:
   StageStateChangeEventRule: 
       Type: AWS::Events::Rule
       Properties: 
+        EventBusName: !Ref EventBus
         EventPattern: 
           source:
             - 'aws.codepipeline'
@@ -45,6 +54,7 @@ Resources:
   ActionStateChangeEventRule: 
       Type: AWS::Events::Rule
       Properties: 
+        EventBusName: !Ref EventBus
         EventPattern: 
           source:
             - 'aws.codepipeline'
