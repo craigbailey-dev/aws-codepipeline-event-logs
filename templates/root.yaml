@@ -11,6 +11,30 @@ Parameters:
     Type: String
     Description: 'The name of the event bus'
     Default: 'codepipeline-events'
+  BufferingHintsSizeInMBs:
+    Type: Number
+    Default: 1
+  BufferingHintsIntervalInSeconds:
+    Type: Number   
+    Default: 60
+
+Outputs:
+  GlueDatabaseName:
+    Value: !Ref GlueDatabaseName
+  EventBusName:
+    Value: !Ref EventBusName
+  LogBucket:
+    Value: !GetAtt LogStack.Outputs.LogBucket
+  DeliveryStreamLogGroup:
+    Value: !GetAtt DeliveryStack.Outputs.DeliveryStreamLogGroup
+  DeliveryStreamLogStream:
+    Value: !GetAtt DeliveryStack.Outputs.DeliveryStreamLogStream
+  PipelineStateChangeTablename:
+    Value: 'pipeline_execution_state_change'
+  StageStateChangeTablename:
+    Value: 'stage_execution_state_change'
+  ActionStateChangeTablename:
+    Value: 'action_execution_state_change'
 
 Resources:
 
@@ -27,6 +51,8 @@ Resources:
       TemplateURL: delivery.yaml
       Parameters:
         LogBucket: !GetAtt LogStack.Outputs.LogBucket
+        IntervalInSeconds: !Ref BufferingHintsIntervalInSeconds
+        SizeInMBs: !Ref BufferingHintsSizeInMBs
 
   EventStack:
     Type: AWS::CloudFormation::Template

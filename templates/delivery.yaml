@@ -5,6 +5,10 @@ Transform:
 Parameters:
   LogBucket:
     Type: String
+  IntervalInSeconds: 
+    Type: Number
+  SizeInMBs:     
+    Type: Number
 
 Outputs:
   PipelineStateChangeDeliveryStreamArn:
@@ -38,8 +42,8 @@ Resources:
         Prefix: 'pipeline_execution_state_change/'
         ErrorOutputPrefix: 'error/pipeline_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
         BufferingHints:
-            SizeInMBs: 1
-            IntervalInSeconds: 60
+            SizeInMBs: !Ref SizeInMBs
+            IntervalInSeconds: !Ref IntervalInSeconds
         CompressionFormat: GZIP
         CloudWatchLoggingOptions:
           Enabled: true
@@ -66,8 +70,8 @@ Resources:
         Prefix: 'stage_execution_state_change/'
         ErrorOutputPrefix: 'error/stage_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
         BufferingHints:
-            SizeInMBs: 1
-            IntervalInSeconds: 60
+            SizeInMBs: !Ref SizeInMBs
+            IntervalInSeconds: !Ref IntervalInSeconds
         CompressionFormat: GZIP
         CloudWatchLoggingOptions:
           Enabled: true
@@ -94,8 +98,8 @@ Resources:
         Prefix: 'action_execution_state_change/'
         ErrorOutputPrefix: 'error/action_execution_state_change/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
         BufferingHints:
-            SizeInMBs: 1
-            IntervalInSeconds: 60
+            SizeInMBs: !Ref SizeInMBs
+            IntervalInSeconds: !Ref IntervalInSeconds
         CompressionFormat: GZIP
         CloudWatchLoggingOptions:
           Enabled: true
