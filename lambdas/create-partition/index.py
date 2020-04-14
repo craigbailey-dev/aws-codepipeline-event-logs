@@ -38,7 +38,7 @@ def form_partition(table, date, hour, s3_location):
                     "Type": "string"
                 },
                 {
-                    "Name": "execution_id",
+                    "Name": "executionId",
                     "Type": "string"
                 }
             ],

@@ -10,7 +10,7 @@ def handler(event, context):
             entry = base64.b64decode(record["data"]).decode("utf-8")
             parsed_entry = json.loads(entry)
             payload = parsed_entry["detail"]
-            payload["execution_id"] = payload["execution-id"]
+            payload["executionId"] = payload["execution-id"]
             del payload["execution-id"]
             payload["pipelineArn"] = parsed_entry["resources"][0]
             payload["eventVersion"] = parsed_entry["version"]

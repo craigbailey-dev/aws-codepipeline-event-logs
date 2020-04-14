@@ -106,7 +106,7 @@ Resources:
                   Name: state
                   Type: string
                 - 
-                  Name: execution_id
+                  Name: executionId
                   Type: string
 
 
@@ -155,7 +155,7 @@ Resources:
                   Name: stage
                   Type: string
                 - 
-                  Name: execution_id
+                  Name: executionId
                   Type: string
 
 
@@ -210,7 +210,7 @@ Resources:
                   Name: region
                   Type: string
                 - 
-                  Name: execution_id
+                  Name: executionId
                   Type: string
                 - 
                   Name: type
