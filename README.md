@@ -60,3 +60,17 @@ The execution state of an action in a pipeline stage has changed.
     - **category** *(string)* - 'Source'|'Build'|'Test'|'Deploy'|'Approval'|'Invoke'
     - **provider** *(string)* - The service that provides the resources for performing the action
     - **version** *(string)* - The version of the action type
+
+
+## Log Partitions
+
+All Glue tables are partitioned by the date and hour that the log arrives in S3. It is highly recommended that Athena queries on Glue database filter based on these paritions, as it will greatly reduce quety execution time and the amount of data processed by the query.
+
+
+## Build and Deploy
+
+To deploy the application, use the `cloudformation package` command from the AWS CLI. 
+ 
+#### Example:
+
+`aws cloudformation package --template templates/root.yaml --s3-bucket $S3_BUCKET --s3-prefix $S3_PREFIX --output-template template-export.yaml`
