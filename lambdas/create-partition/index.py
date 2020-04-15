@@ -80,14 +80,14 @@ def handler(event, context):
         }
 
         # Add additional columns if the Glue table is for stage and action events
-        if table == "stage-execution-state-change":
+        if table == "stage_execution_state_change":
             partition["StorageDescriptor"]["Columns"].extend([
                 {
                     "Name": "stage",
                     "Type": "string"
                 }
             ])
-        elif table == "action-execution-state-change":
+        elif table == "action_execution_state_change":
             partition["StorageDescriptor"]["Columns"].extend([
                 {
                     "Name": "stage",
